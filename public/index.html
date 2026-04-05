@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Harness Engineering 教材 · Web Reader（動態）</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,600;1,400&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,700;1,6..72,500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --font-display: "Newsreader", "Noto Serif TC", "Songti SC", serif;
+      --font-body: "Literata", "Noto Serif TC", "Songti SC", Georgia, serif;
+      --font-mono: "JetBrains Mono", "SF Mono", ui-monospace, monospace;
+      --radius: 14px;
+      --shadow: 0 18px 50px rgba(18, 24, 32, 0.12);
+      --transition: 0.22s ease;
+    }
+    [data-theme="light"] {
+      --bg: #f6f3ec;
+      --bg-elevated: #fffdf8;
+      --surface: rgba(255, 253, 248, 0.92);
+      --text: #141820;
+      --muted: #5c6470;
+      --border: rgba(20, 24, 32, 0.1);
+      --accent: #b54a2a;
+      --accent-soft: rgba(181, 74, 42, 0.12);
+      --link: #0b5cab;
+      --code-bg: rgba(20, 24, 32, 0.06);
+      --nav-active: rgba(181, 74, 42, 0.14);
+      --focus: 0 0 0 3px rgba(11, 92, 171, 0.35);
+      --noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    }
+    [data-theme="dark"] {
+      --bg: #0e1117;
+      --bg-elevated: #151a22;
+      --surface: rgba(21, 26, 34, 0.94);
+      --text: #ece8e1;
+      --muted: #9aa3b2;
+      --border: rgba(236, 232, 225, 0.08);
+      --accent: #e8a882;
+      --accent-soft: rgba(232, 168, 130, 0.14);
+      --link: #8ec5ff;
+      --code-bg: rgba(0, 0, 0, 0.35);
+      --nav-active: rgba(232, 168, 130, 0.16);
+      --focus: 0 0 0 3px rgba(142, 197, 255, 0.45);
+      --noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      font-size: 1.05rem;
+      line-height: 1.72;
+      color: var(--text);
+      background-color: var(--bg);
+      background-image: var(--noise);
+      transition: background-color var(--transition), color var(--transition);
+    }
+    a { color: var(--link); text-underline-offset: 3px; }
+    a:hover { opacity: 0.92; }
+    .app {
+      display: grid;
+      grid-template-columns: minmax(260px, 300px) minmax(0, 1fr);
+      min-height: 100vh;
+      min-height: 100dvh;
+    }
+    @media (min-width: 1400px) {
+      .app { grid-template-columns: minmax(280px, 320px) minmax(0, 1fr); }
+    }
+    @media (max-width: 900px) {
+      .app { grid-template-columns: minmax(0, 1fr); }
+      .sidebar { position: fixed; inset: 0 auto 0 0; width: min(92vw, 320px); max-width: calc(100vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)); z-index: 40; transform: translateX(-105%); transition: transform 0.28s ease; box-shadow: var(--shadow); padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px)); }
+      .sidebar.open { transform: translateX(0); }
+      .backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 30; -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); }
+      .backdrop.show { display: block; }
+    }
+    .sidebar {
+      border-right: 1px solid var(--border);
+      background: var(--surface);
+      backdrop-filter: blur(10px);
+      padding: calc(1.25rem + env(safe-area-inset-top, 0px)) 1rem 2rem max(1rem, env(safe-area-inset-left, 0px));
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .brand {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      line-height: 1.25;
+      margin: 0 0 0.35rem;
+    }
+    .brand-sub {
+      margin: 0 0 1rem;
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
+    .btn {
+      font: inherit;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--bg-elevated);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 0.35rem 0.85rem;
+      font-size: 0.88rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .btn:hover { border-color: var(--accent); }
+    .btn:focus-visible { outline: none; box-shadow: var(--focus); }
+    .search {
+      width: 100%;
+      margin-bottom: 0.75rem;
+      padding: 0.55rem 0.75rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg-elevated);
+      color: var(--text);
+      font: inherit;
+    }
+    .search:focus { outline: none; box-shadow: var(--focus); border-color: transparent; }
+    .nav-section-title {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+      margin: 1.15rem 0 0.45rem;
+      font-weight: 600;
+    }
+    .nav-list { list-style: none; margin: 0; padding: 0; }
+    .nav-item { margin: 0.15rem 0; }
+    .nav-link {
+      display: block;
+      width: 100%;
+      text-align: left;
+      border: none;
+      background: transparent;
+      color: var(--text);
+      font: inherit;
+      font-size: 0.92rem;
+      padding: 0.45rem 0.55rem;
+      border-radius: 8px;
+      cursor: pointer;
+      line-height: 1.35;
+    }
+    .nav-link:hover { background: var(--accent-soft); }
+    .nav-link[aria-current="page"] { background: var(--nav-active); font-weight: 600; }
+    .nav-link.hidden { display: none; }
+    main {
+      width: 100%;
+      min-width: 0;
+      padding: calc(1.5rem + env(safe-area-inset-top, 0px)) clamp(1rem, 3.5vw, 2.75rem) calc(4rem + env(safe-area-inset-bottom, 0px)) clamp(1rem, 3.5vw, 2.75rem);
+      padding-right: max(clamp(1rem, 3.5vw, 2.75rem), env(safe-area-inset-right, 0px));
+    }
+    @media (min-width: 1200px) {
+      main {
+        padding-left: clamp(1.5rem, 4vw, 3.25rem);
+        padding-right: max(clamp(1.5rem, 4vw, 3.25rem), env(safe-area-inset-right, 0px));
+      }
+    }
+    .main-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .doc-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.55rem, 3vw, 2.1rem);
+      font-weight: 700;
+      margin: 0;
+      line-height: 1.25;
+    }
+    .doc-meta { font-size: 0.88rem; color: var(--muted); margin: 0.35rem 0 0; }
+    @media (max-width: 900px) {
+      main { padding-top: calc(1.1rem + env(safe-area-inset-top, 0px)); }
+    }
+    @media (max-width: 480px) {
+      body { font-size: 1rem; line-height: 1.68; }
+      .doc-title { font-size: clamp(1.35rem, 6vw, 1.65rem); }
+      .nav-link { padding: 0.55rem 0.6rem; min-height: 44px; }
+      .btn { min-height: 44px; }
+    }
+    .prose {
+      width: 100%;
+      max-width: none;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: clamp(1rem, 2.2vw, 1.85rem) clamp(1rem, 2.8vw, 2rem);
+      box-shadow: var(--shadow);
+    }
+    .prose :first-child { margin-top: 0; }
+    .prose :last-child { margin-bottom: 0; }
+    .prose h1, .prose h2, .prose h3, .prose h4 {
+      font-family: var(--font-display);
+      line-height: 1.28;
+      margin-top: 1.6em;
+      margin-bottom: 0.55em;
+    }
+    .prose h1 { font-size: 1.75rem; }
+    .prose h2 { font-size: 1.38rem; border-bottom: 1px solid var(--border); padding-bottom: 0.35rem; }
+    .prose h3 { font-size: 1.15rem; }
+    .prose p { margin: 0.85em 0; }
+    .prose ul, .prose ol { padding-left: 1.35rem; }
+    .prose li { margin: 0.35em 0; }
+    .prose blockquote {
+      margin: 1rem 0;
+      padding: 0.6rem 1rem;
+      border-left: 4px solid var(--accent);
+      background: var(--accent-soft);
+      color: var(--text);
+    }
+    .prose code {
+      font-family: var(--font-mono);
+      font-size: 0.88em;
+      background: var(--code-bg);
+      padding: 0.12em 0.35em;
+      border-radius: 6px;
+    }
+    .prose pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.1rem;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      font-family: var(--font-mono);
+      font-size: 0.86rem;
+      line-height: 1.55;
+    }
+    .prose pre code { background: none; padding: 0; font-size: inherit; }
+    .prose table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin: 1rem 0; }
+    .prose th, .prose td { border: 1px solid var(--border); padding: 0.5rem 0.65rem; text-align: left; }
+    .prose th { background: var(--accent-soft); }
+    .to-top {
+      position: fixed;
+      bottom: max(1.1rem, env(safe-area-inset-bottom, 0px));
+      right: max(1.1rem, env(safe-area-inset-right, 0px));
+      z-index: 45;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .to-top.visible { opacity: 1; pointer-events: auto; }
+    @media (max-width: 900px) {
+      .to-top { bottom: max(4.5rem, calc(1.1rem + env(safe-area-inset-bottom, 0px))); }
+    }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      border: 0;
+    }
+    .load-err { color: var(--accent); font-weight: 600; }
+  </style>
+</head>
+<body>
+  <a class="sr-only" href="#content">跳到主要內容</a>
+  <div class="app">
+    <aside class="sidebar" id="sidebar" aria-label="章節導覽">
+      <p class="brand">Harness Engineering</p>
+      <p class="brand-sub">動態讀取專案內 Markdown（Vercel：<code>/api/doc</code>）· 與離線版 <code>reader.html</code> 導覽一致</p>
+      <div class="toolbar">
+        <button type="button" class="btn" id="themeBtn" aria-label="切換深色與淺色模式">主題</button>
+      </div>
+      <input type="search" class="search" id="navSearch" placeholder="篩選章節標題…" autocomplete="off" />
+      <div id="navMount"></div>
+    </aside>
+    <div class="backdrop" id="backdrop" hidden></div>
+    <main id="content">
+      <div class="main-header">
+        <div>
+          <h1 class="doc-title" id="docTitle">載入中…</h1>
+          <p class="doc-meta" id="docMeta"></p>
+        </div>
+        <div class="toolbar">
+          <button type="button" class="btn" id="menuBtn" aria-expanded="false" aria-controls="sidebar">目錄</button>
+        </div>
+      </div>
+      <article class="prose" id="docBody" aria-live="polite"></article>
+    </main>
+  </div>
+  <button type="button" class="btn to-top" id="toTop" aria-label="回到頂端">頂端</button>
+  <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+  <script>
+  (function () {
+    var DEFAULT_KEY = "readme";
+
+    function firstHeadingTitle(md, fallback) {
+      var lines = md.split(/\r?\n/);
+      for (var i = 0; i < lines.length; i++) {
+        var s = lines[i].trim();
+        if (s.indexOf("# ") === 0) return s.slice(2).trim();
+      }
+      return fallback;
+    }
+
+    function stripFirstH1(html) {
+      return html.replace(/^\s*<h1[^>]*>[\s\S]*?<\/h1>\s*/i, "");
+    }
+
+    function rewriteInternalMdLinks(html, pathToKey) {
+      return html.replace(/href=(["'])([^"']+\.md(?:#[^"']*)?)\1/g, function (full, quote, href) {
+        if (/^(https?:|mailto:|#)/i.test(href)) return full;
+        var parts = href.split("#");
+        var clean = parts[0];
+        var frag = parts.length > 1 ? "#" + parts.slice(1).join("#") : "";
+        if (!/\.md$/i.test(clean)) return full;
+        clean = clean.replace(/\\/g, "/").replace(/^\.\//, "");
+        var key = pathToKey[clean];
+        if (!key) {
+          var pk = Object.keys(pathToKey);
+          for (var j = 0; j < pk.length; j++) {
+            var k = pk[j];
+            if (k === clean || k.endsWith("/" + clean)) {
+              key = pathToKey[k];
+              break;
+            }
+          }
+        }
+        if (!key) return full;
+        var h = frag || "#";
+        return "href=" + quote + h + quote + ' data-doc="' + key + '" class="internal-md-link"';
+      });
+    }
+
+    var root = document.documentElement;
+    var storedTheme = localStorage.getItem("he-reader-theme");
+    function applyTheme(t) {
+      root.setAttribute("data-theme", t);
+      localStorage.setItem("he-reader-theme", t);
+      var btn = document.getElementById("themeBtn");
+      if (btn) btn.textContent = t === "dark" ? "淺色模式" : "深色模式";
+    }
+    if (storedTheme === "light" || storedTheme === "dark") applyTheme(storedTheme);
+    else applyTheme(window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.getElementById("themeBtn").addEventListener("click", function () {
+      var cur = root.getAttribute("data-theme") === "dark" ? "dark" : "light";
+      applyTheme(cur === "dark" ? "light" : "dark");
+    });
+
+    var manifest = null;
+    var pathToKey = {};
+
+    function openMenu() {
+      document.getElementById("sidebar").classList.add("open");
+      document.getElementById("backdrop").classList.add("show");
+      document.getElementById("backdrop").hidden = false;
+      document.getElementById("menuBtn").setAttribute("aria-expanded", "true");
+    }
+    function closeMenu() {
+      document.getElementById("sidebar").classList.remove("open");
+      document.getElementById("backdrop").classList.remove("show");
+      document.getElementById("backdrop").hidden = true;
+      document.getElementById("menuBtn").setAttribute("aria-expanded", "false");
+    }
+    document.getElementById("menuBtn").addEventListener("click", function () {
+      if (document.getElementById("sidebar").classList.contains("open")) closeMenu();
+      else openMenu();
+    });
+    document.getElementById("backdrop").addEventListener("click", closeMenu);
+
+    function wireInternalLinks(showDocFn) {
+      document.getElementById("docBody").querySelectorAll("a.internal-md-link").forEach(function (a) {
+        a.addEventListener("click", function (ev) {
+          var k = a.getAttribute("data-doc");
+          if (!k) return;
+          ev.preventDefault();
+          showDocFn(k);
+          var h = a.getAttribute("href");
+          if (h && h.indexOf("#") > 0) {
+            var id = h.slice(h.indexOf("#") + 1);
+            setTimeout(function () {
+              var target = document.getElementById(id);
+              if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+            }, 50);
+          }
+        });
+      });
+    }
+
+    function showDoc(key, push) {
+      if (!manifest || !manifest.keys[key]) return;
+      document.getElementById("docTitle").textContent = "載入中…";
+      document.getElementById("docMeta").textContent = "";
+      document.getElementById("docBody").innerHTML = "<p>載入中…</p>";
+
+      fetch("/api/doc?key=" + encodeURIComponent(key))
+        .then(function (r) {
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          return r.json();
+        })
+        .then(function (data) {
+          var md = data.markdown || "";
+          var label = (manifest.labels && manifest.labels[key]) || key;
+          var title = firstHeadingTitle(md, label);
+          var rawHtml = marked.parse(md, { headerIds: true });
+          var html = rewriteInternalMdLinks(stripFirstH1(rawHtml), pathToKey);
+          document.getElementById("docBody").innerHTML = html;
+          document.getElementById("docTitle").textContent = title;
+          document.getElementById("docMeta").textContent = data.path || "";
+          document.querySelectorAll(".nav-link").forEach(function (el) {
+            el.setAttribute("aria-current", el.getAttribute("data-key") === key ? "page" : "false");
+          });
+          if (push !== false) {
+            try {
+              history.replaceState(null, "", "#" + encodeURIComponent(key));
+            } catch (e) {}
+          }
+          localStorage.setItem("he-reader-last", key);
+          wireInternalLinks(showDoc);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          closeMenu();
+        })
+        .catch(function (e) {
+          document.getElementById("docTitle").textContent = "載入失敗";
+          document.getElementById("docMeta").textContent = String(e && e.message ? e.message : e);
+          document.getElementById("docBody").innerHTML =
+            '<p class="load-err">無法載入章節。請確認已部署 <code>/api/doc</code>，且建置已產生 <code>public/book-manifest.json</code>。</p>';
+        });
+    }
+
+    function buildNav() {
+      var mount = document.getElementById("navMount");
+      mount.innerHTML = "";
+      manifest.sections.forEach(function (sec) {
+        var t = document.createElement("div");
+        t.className = "nav-section-title";
+        t.textContent = sec.title;
+        mount.appendChild(t);
+        var ul = document.createElement("ul");
+        ul.className = "nav-list";
+        sec.keys.forEach(function (k) {
+          var li = document.createElement("li");
+          li.className = "nav-item";
+          var btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "nav-link";
+          btn.setAttribute("data-key", k);
+          btn.textContent = manifest.labels[k] || k;
+          btn.addEventListener("click", function () {
+            showDoc(k);
+          });
+          li.appendChild(btn);
+          ul.appendChild(li);
+        });
+        mount.appendChild(ul);
+      });
+
+      var search = document.getElementById("navSearch");
+      search.addEventListener("input", function () {
+        var q = search.value.trim().toLowerCase();
+        document.querySelectorAll(".nav-link").forEach(function (el) {
+          var t = (el.textContent || "").toLowerCase();
+          el.classList.toggle("hidden", q && t.indexOf(q) === -1);
+        });
+        document.querySelectorAll(".nav-section-title").forEach(function (title) {
+          var section = title.nextElementSibling;
+          if (!section) return;
+          var any = false;
+          section.querySelectorAll(".nav-link").forEach(function (el) {
+            if (!el.classList.contains("hidden")) any = true;
+          });
+          title.style.display = q && !any ? "none" : "";
+        });
+      });
+    }
+
+    var toTop = document.getElementById("toTop");
+    window.addEventListener("scroll", function () {
+      toTop.classList.toggle("visible", window.scrollY > 400);
+    });
+    toTop.addEventListener("click", function () {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    fetch("/book-manifest.json")
+      .then(function (r) {
+        if (!r.ok) throw new Error("manifest " + r.status);
+        return r.json();
+      })
+      .then(function (m) {
+        manifest = m;
+        pathToKey = m.pathToKey || {};
+        buildNav();
+        var initial = DEFAULT_KEY;
+        try {
+          var h = location.hash ? decodeURIComponent(location.hash.slice(1)) : "";
+          if (h && manifest.keys[h]) initial = h;
+          else {
+            var last = localStorage.getItem("he-reader-last");
+            if (last && manifest.keys[last]) initial = last;
+          }
+        } catch (e) {}
+        showDoc(initial, false);
+      })
+      .catch(function (e) {
+        document.getElementById("docTitle").textContent = "設定錯誤";
+        document.getElementById("docMeta").textContent = String(e && e.message ? e.message : e);
+        document.getElementById("docBody").innerHTML =
+          '<p class="load-err">找不到 <code>/book-manifest.json</code>。請執行 <code>python3 tools/build_reader.py</code> 後再部署。</p>';
+      });
+  })();
+  </script>
+</body>
+</html>

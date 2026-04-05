@@ -1,0 +1,7 @@
+{
+  "name": "harness-engineering-book",
+  "private": true,
+  "scripts": {
+    "build": "node -e \"console.log('Skip: run python3 tools/build_reader.py locally to refresh reader.html + public/book-manifest.json');\""
+  }
+}

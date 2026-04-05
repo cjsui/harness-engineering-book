@@ -1,0 +1,153 @@
+{
+  "version": 1,
+  "keys": {
+    "readme": "README.md",
+    "index": "index.md",
+    "syllabus": "syllabus.md",
+    "roadmap": "roadmap.md",
+    "glossary": "glossary.md",
+    "references": "references.md",
+    "ch01": "part-1-foundations/01-from-prompt-to-harness-engineering.md",
+    "ch02": "part-1-foundations/02-agent-system-components.md",
+    "ch03": "part-1-foundations/03-harness-design-principles.md",
+    "ch04": "part-1-foundations/04-how-to-read-a-real-agent-harness.md",
+    "ch05": "part-2-claw-code/05-cli-entry-and-system-surface.md",
+    "ch06": "part-2-claw-code/06-conversation-runtime.md",
+    "ch07": "part-2-claw-code/07-tool-system.md",
+    "ch08": "part-2-claw-code/08-permissions-and-guardrails.md",
+    "ch09": "part-2-claw-code/09-session-transcript-memory.md",
+    "ch10": "part-2-claw-code/10-prompt-assembly-and-project-context.md",
+    "ch11": "part-2-claw-code/11-config-modes-and-environment.md",
+    "ch12": "part-2-claw-code/12-mcp-and-plugins.md",
+    "ch13": "part-2-claw-code/13-remote-and-execution-environments.md",
+    "ch14": "part-2-claw-code/14-parity-harness-and-testing.md",
+    "ch15": "part-2-claw-code/15-understanding-claw-code-as-a-whole.md",
+    "ch16": "part-3-mini-harness/16-defining-the-mini-harness-scope.md",
+    "ch17": "part-3-mini-harness/17-building-runtime-tools-permissions.md",
+    "ch18": "part-3-mini-harness/18-session-persistence-and-basic-testing.md",
+    "ch19": "part-4-integration/19-from-mini-harness-back-to-real-harness.md",
+    "appendix-a": "appendices/appendix-a-claw-code-reading-map.md",
+    "appendix-b": "appendices/appendix-b-mini-harness-project-guide.md",
+    "appendix-d": "appendices/appendix-d-further-study.md"
+  },
+  "labels": {
+    "readme": "總覽 · README",
+    "index": "全書索引",
+    "syllabus": "課程大綱",
+    "roadmap": "學習路線圖",
+    "glossary": "術語表",
+    "references": "參考閱讀",
+    "ch01": "第 1 章",
+    "ch02": "第 2 章",
+    "ch03": "第 3 章",
+    "ch04": "第 4 章",
+    "ch05": "第 5 章",
+    "ch06": "第 6 章",
+    "ch07": "第 7 章",
+    "ch08": "第 8 章",
+    "ch09": "第 9 章",
+    "ch10": "第 10 章",
+    "ch11": "第 11 章",
+    "ch12": "第 12 章",
+    "ch13": "第 13 章",
+    "ch14": "第 14 章",
+    "ch15": "第 15 章",
+    "ch16": "第 16 章",
+    "ch17": "第 17 章",
+    "ch18": "第 18 章",
+    "ch19": "第 19 章",
+    "appendix-a": "附錄 A",
+    "appendix-b": "附錄 B",
+    "appendix-d": "附錄 D"
+  },
+  "sections": [
+    {
+      "title": "導覽與資源",
+      "keys": [
+        "readme",
+        "index",
+        "syllabus",
+        "roadmap",
+        "glossary",
+        "references"
+      ]
+    },
+    {
+      "title": "Part I · 基礎觀念",
+      "keys": [
+        "ch01",
+        "ch02",
+        "ch03",
+        "ch04"
+      ]
+    },
+    {
+      "title": "Part II · claw-code",
+      "keys": [
+        "ch05",
+        "ch06",
+        "ch07",
+        "ch08",
+        "ch09",
+        "ch10",
+        "ch11",
+        "ch12",
+        "ch13",
+        "ch14",
+        "ch15"
+      ]
+    },
+    {
+      "title": "Part III · mini harness",
+      "keys": [
+        "ch16",
+        "ch17",
+        "ch18"
+      ]
+    },
+    {
+      "title": "Part IV · 整合",
+      "keys": [
+        "ch19"
+      ]
+    },
+    {
+      "title": "附錄",
+      "keys": [
+        "appendix-a",
+        "appendix-b",
+        "appendix-d"
+      ]
+    }
+  ],
+  "pathToKey": {
+    "README.md": "readme",
+    "index.md": "index",
+    "syllabus.md": "syllabus",
+    "roadmap.md": "roadmap",
+    "glossary.md": "glossary",
+    "references.md": "references",
+    "part-1-foundations/01-from-prompt-to-harness-engineering.md": "ch01",
+    "part-1-foundations/02-agent-system-components.md": "ch02",
+    "part-1-foundations/03-harness-design-principles.md": "ch03",
+    "part-1-foundations/04-how-to-read-a-real-agent-harness.md": "ch04",
+    "part-2-claw-code/05-cli-entry-and-system-surface.md": "ch05",
+    "part-2-claw-code/06-conversation-runtime.md": "ch06",
+    "part-2-claw-code/07-tool-system.md": "ch07",
+    "part-2-claw-code/08-permissions-and-guardrails.md": "ch08",
+    "part-2-claw-code/09-session-transcript-memory.md": "ch09",
+    "part-2-claw-code/10-prompt-assembly-and-project-context.md": "ch10",
+    "part-2-claw-code/11-config-modes-and-environment.md": "ch11",
+    "part-2-claw-code/12-mcp-and-plugins.md": "ch12",
+    "part-2-claw-code/13-remote-and-execution-environments.md": "ch13",
+    "part-2-claw-code/14-parity-harness-and-testing.md": "ch14",
+    "part-2-claw-code/15-understanding-claw-code-as-a-whole.md": "ch15",
+    "part-3-mini-harness/16-defining-the-mini-harness-scope.md": "ch16",
+    "part-3-mini-harness/17-building-runtime-tools-permissions.md": "ch17",
+    "part-3-mini-harness/18-session-persistence-and-basic-testing.md": "ch18",
+    "part-4-integration/19-from-mini-harness-back-to-real-harness.md": "ch19",
+    "appendices/appendix-a-claw-code-reading-map.md": "appendix-a",
+    "appendices/appendix-b-mini-harness-project-guide.md": "appendix-b",
+    "appendices/appendix-d-further-study.md": "appendix-d"
+  }
+}
