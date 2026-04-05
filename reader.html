@@ -83,6 +83,7 @@
       padding: calc(1.25rem + env(safe-area-inset-top, 0px)) 1rem 2rem max(1rem, env(safe-area-inset-left, 0px));
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
+      min-width: 0;
     }
     .brand {
       font-family: var(--font-display);
@@ -139,11 +140,13 @@
       margin: 1.15rem 0 0.45rem;
       font-weight: 600;
     }
-    .nav-list { list-style: none; margin: 0; padding: 0; }
-    .nav-item { margin: 0.15rem 0; }
+    .nav-list { list-style: none; margin: 0; padding: 0; min-width: 0; }
+    .nav-item { margin: 0.15rem 0; min-width: 0; }
     .nav-link {
       display: block;
       width: 100%;
+      max-width: 100%;
+      min-width: 0;
       text-align: left;
       border: none;
       background: transparent;
@@ -154,6 +157,9 @@
       border-radius: 8px;
       cursor: pointer;
       line-height: 1.35;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     .nav-link:hover { background: var(--accent-soft); }
     .nav-link[aria-current="page"] {
@@ -323,49 +329,49 @@
       <input type="search" class="search" id="navSearch" placeholder="篩選章節標題…" autocomplete="off" />
       <div class="nav-section-title">導覽與資源</div>
 <ul class="nav-list">
-<li class="nav-item"><button type="button" class="nav-link" data-key="readme">Harness Engineering Book</button></li>
-<li class="nav-item"><button type="button" class="nav-link" data-key="index">Harness Engineering 教材索引</button></li>
-<li class="nav-item"><button type="button" class="nav-link" data-key="syllabus">Harness Engineering 課程綱要</button></li>
-<li class="nav-item"><button type="button" class="nav-link" data-key="roadmap">自主學習路線圖</button></li>
-<li class="nav-item"><button type="button" class="nav-link" data-key="glossary">Glossary</button></li>
-<li class="nav-item"><button type="button" class="nav-link" data-key="references">References</button></li>
+<li class="nav-item"><button type="button" class="nav-link" data-key="readme" title="Harness Engineering Book">Harness Engineering Book</button></li>
+<li class="nav-item"><button type="button" class="nav-link" data-key="index" title="Harness Engineering 教材索引">Harness Engineering 教材索引</button></li>
+<li class="nav-item"><button type="button" class="nav-link" data-key="syllabus" title="Harness Engineering 課程綱要">Harness Engineering 課程綱要</button></li>
+<li class="nav-item"><button type="button" class="nav-link" data-key="roadmap" title="自主學習路線圖">自主學習路線圖</button></li>
+<li class="nav-item"><button type="button" class="nav-link" data-key="glossary" title="Glossary">Glossary</button></li>
+<li class="nav-item"><button type="button" class="nav-link" data-key="references" title="References">References</button></li>
 </ul>
 <div class="nav-section-title">Part I · 基礎觀念</div>
 <ul class="nav-list">
-<li class="nav-item"><button type="button" class="nav-link" data-key="ch01">第 1 章：從 Prompt Engineering 到 Harness Engineering</button></li>
-<li class="nav-item"><button type="button" class="nav-link" data-key="ch02">第 2 章：AI Agent 系統的基本構成</button></li>
-<li class="nav-item"><button type="button" class="nav-link" data-key="ch03">第 3 章：Harness 的核心設計原則</button></li>
-<li class="nav-item"><button type="button" class="nav-link" data-key="ch04">第 4 章：如何閱讀一個真實的 Agent Harness</button></li>
+<li class="nav-item"><button type="button" class="nav-link" data-key="ch01" title="第 1 章：從 Prompt Engineering 到 Harness Engineering">第 1 章：從 Prompt Engineering 到 Harness Engineering</button></li>
+<li class="nav-item"><button type="button" class="nav-link" data-key="ch02" title="第 2 章：AI Agent 系統的基本構成">第 2 章：AI Agent 系統的基本構成</button></li>
+<li class="nav-item"><button type="button" class="nav-link" data-key="ch03" title="第 3 章：Harness 的核心設計原則">第 3 章：Harness 的核心設計原則</button></li>
+<li class="nav-item"><button type="button" class="nav-link" data-key="ch04" title="第 4 章：如何閱讀一個真實的 Agent Harness">第 4 章：如何閱讀一個真實的 Agent Harness</button></li>
 </ul>
 <div class="nav-section-title">Part II · claw-code</div>
 <ul class="nav-list">
-<li class="nav-item"><button type="button" class="nav-link" data-key="ch05">第 5 章：從 CLI 入口看整個系統</button></li>
-<li class="nav-item"><button type="button" class="nav-link" data-key="ch06">第 6 章：Conversation Runtime：Agent Loop 的心臟</button></li>
-<li class="nav-item"><button type="button" class="nav-link" data-key="ch07">第 7 章：Tool System：讓模型有手腳</button></li>
-<li class="nav-item"><button type="button" class="nav-link" data-key="ch08">第 8 章：Permissions and Guardrails：讓模型不會亂來</button></li>
-<li class="nav-item"><button type="button" class="nav-link" data-key="ch09">第 9 章：Session、Transcript、Memory</button></li>
-<li class="nav-item"><button type="button" class="nav-link" data-key="ch10">第 10 章：Prompt Assembly 與 Project Context</button></li>
-<li class="nav-item"><button type="button" class="nav-link" data-key="ch11">第 11 章：Config、Modes 與執行環境</button></li>
-<li class="nav-item"><button type="button" class="nav-link" data-key="ch12">第 12 章：MCP、Plugins 與能力擴充</button></li>
-<li class="nav-item"><button type="button" class="nav-link" data-key="ch13">第 13 章：Remote 與多執行環境能力</button></li>
-<li class="nav-item"><button type="button" class="nav-link" data-key="ch14">第 14 章：Parity Harness 與測試哲學</button></li>
-<li class="nav-item"><button type="button" class="nav-link" data-key="ch15">第 15 章：把 `claw-code` 當成一個完整系統來理解</button></li>
+<li class="nav-item"><button type="button" class="nav-link" data-key="ch05" title="第 5 章：從 CLI 入口看整個系統">第 5 章：從 CLI 入口看整個系統</button></li>
+<li class="nav-item"><button type="button" class="nav-link" data-key="ch06" title="第 6 章：Conversation Runtime：Agent Loop 的心臟">第 6 章：Conversation Runtime：Agent Loop 的心臟</button></li>
+<li class="nav-item"><button type="button" class="nav-link" data-key="ch07" title="第 7 章：Tool System：讓模型有手腳">第 7 章：Tool System：讓模型有手腳</button></li>
+<li class="nav-item"><button type="button" class="nav-link" data-key="ch08" title="第 8 章：Permissions and Guardrails：讓模型不會亂來">第 8 章：Permissions and Guardrails：讓模型不會亂來</button></li>
+<li class="nav-item"><button type="button" class="nav-link" data-key="ch09" title="第 9 章：Session、Transcript、Memory">第 9 章：Session、Transcript、Memory</button></li>
+<li class="nav-item"><button type="button" class="nav-link" data-key="ch10" title="第 10 章：Prompt Assembly 與 Project Context">第 10 章：Prompt Assembly 與 Project Context</button></li>
+<li class="nav-item"><button type="button" class="nav-link" data-key="ch11" title="第 11 章：Config、Modes 與執行環境">第 11 章：Config、Modes 與執行環境</button></li>
+<li class="nav-item"><button type="button" class="nav-link" data-key="ch12" title="第 12 章：MCP、Plugins 與能力擴充">第 12 章：MCP、Plugins 與能力擴充</button></li>
+<li class="nav-item"><button type="button" class="nav-link" data-key="ch13" title="第 13 章：Remote 與多執行環境能力">第 13 章：Remote 與多執行環境能力</button></li>
+<li class="nav-item"><button type="button" class="nav-link" data-key="ch14" title="第 14 章：Parity Harness 與測試哲學">第 14 章：Parity Harness 與測試哲學</button></li>
+<li class="nav-item"><button type="button" class="nav-link" data-key="ch15" title="第 15 章：把 `claw-code` 當成一個完整系統來理解">第 15 章：把 `claw-code` 當成一個完整系統來理解</button></li>
 </ul>
 <div class="nav-section-title">Part III · mini harness</div>
 <ul class="nav-list">
-<li class="nav-item"><button type="button" class="nav-link" data-key="ch16">第 16 章：定義 Mini Harness 的最小範圍</button></li>
-<li class="nav-item"><button type="button" class="nav-link" data-key="ch17">第 17 章：實作最小 Runtime、Tools 與 Permissions</button></li>
-<li class="nav-item"><button type="button" class="nav-link" data-key="ch18">第 18 章：加入 Session Persistence 與基本測試</button></li>
+<li class="nav-item"><button type="button" class="nav-link" data-key="ch16" title="第 16 章：定義 Mini Harness 的最小範圍">第 16 章：定義 Mini Harness 的最小範圍</button></li>
+<li class="nav-item"><button type="button" class="nav-link" data-key="ch17" title="第 17 章：實作最小 Runtime、Tools 與 Permissions">第 17 章：實作最小 Runtime、Tools 與 Permissions</button></li>
+<li class="nav-item"><button type="button" class="nav-link" data-key="ch18" title="第 18 章：加入 Session Persistence 與基本測試">第 18 章：加入 Session Persistence 與基本測試</button></li>
 </ul>
 <div class="nav-section-title">Part IV · 整合</div>
 <ul class="nav-list">
-<li class="nav-item"><button type="button" class="nav-link" data-key="ch19">第 19 章：從 Mini Harness 回看真實 Harness</button></li>
+<li class="nav-item"><button type="button" class="nav-link" data-key="ch19" title="第 19 章：從 Mini Harness 回看真實 Harness">第 19 章：從 Mini Harness 回看真實 Harness</button></li>
 </ul>
 <div class="nav-section-title">附錄</div>
 <ul class="nav-list">
-<li class="nav-item"><button type="button" class="nav-link" data-key="appendix-a">附錄 A：`claw-code` 閱讀地圖</button></li>
-<li class="nav-item"><button type="button" class="nav-link" data-key="appendix-b">附錄 B：`mini harness` 專題製作指南</button></li>
-<li class="nav-item"><button type="button" class="nav-link" data-key="appendix-d">附錄 D：後續進修方向</button></li>
+<li class="nav-item"><button type="button" class="nav-link" data-key="appendix-a" title="附錄 A：`claw-code` 閱讀地圖">附錄 A：`claw-code` 閱讀地圖</button></li>
+<li class="nav-item"><button type="button" class="nav-link" data-key="appendix-b" title="附錄 B：`mini harness` 專題製作指南">附錄 B：`mini harness` 專題製作指南</button></li>
+<li class="nav-item"><button type="button" class="nav-link" data-key="appendix-d" title="附錄 D：後續進修方向">附錄 D：後續進修方向</button></li>
 </ul>
     </aside>
     <div class="backdrop" id="backdrop" hidden></div>

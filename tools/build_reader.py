@@ -237,6 +237,7 @@ HTML_SHELL = r"""<!DOCTYPE html>
       padding: calc(1.25rem + env(safe-area-inset-top, 0px)) 1rem 2rem max(1rem, env(safe-area-inset-left, 0px));
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
+      min-width: 0;
     }
     .brand {
       font-family: var(--font-display);
@@ -293,11 +294,13 @@ HTML_SHELL = r"""<!DOCTYPE html>
       margin: 1.15rem 0 0.45rem;
       font-weight: 600;
     }
-    .nav-list { list-style: none; margin: 0; padding: 0; }
-    .nav-item { margin: 0.15rem 0; }
+    .nav-list { list-style: none; margin: 0; padding: 0; min-width: 0; }
+    .nav-item { margin: 0.15rem 0; min-width: 0; }
     .nav-link {
       display: block;
       width: 100%;
+      max-width: 100%;
+      min-width: 0;
       text-align: left;
       border: none;
       background: transparent;
@@ -308,6 +311,9 @@ HTML_SHELL = r"""<!DOCTYPE html>
       border-radius: 8px;
       cursor: pointer;
       line-height: 1.35;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     .nav-link:hover { background: var(--accent-soft); }
     .nav-link[aria-current="page"] {
@@ -629,8 +635,9 @@ def build_nav_html(nav_structure: list[tuple[str, str, tuple[str, ...]]], labels
         chunks.append('<ul class="nav-list">')
         for k in keys:
             text = labels.get(k, k)
+            title_attr = f' title="{_html_escape(text)}"'
             chunks.append(
-                f'<li class="nav-item"><button type="button" class="nav-link" data-key="{k}">{_html_escape(text)}</button></li>'
+                f'<li class="nav-item"><button type="button" class="nav-link" data-key="{k}"{title_attr}>{_html_escape(text)}</button></li>'
             )
         chunks.append("</ul>")
     return "\n".join(chunks)
@@ -661,7 +668,7 @@ def copy_markdown_to_public_md() -> None:
     print(f"Wrote markdown mirrors under {MD_PUBLIC}")
 
 
-def write_book_manifest() -> None:
+def write_book_manifest(titles: dict[str, str]) -> None:
     """Emit JSON for public/index.html (dynamic Markdown reader) + static /md/*.md paths."""
     path_to_key: dict[str, str] = {rel.replace("\\", "/"): key for key, _nav, rel in NAV}
     keys: dict[str, str] = {key: rel.replace("\\", "/") for key, _nav, rel in NAV}
@@ -674,6 +681,7 @@ def write_book_manifest() -> None:
         "version": 1,
         "keys": keys,
         "labels": labels,
+        "titles": {k: titles[k] for k in titles},
         "sections": sections,
         "pathToKey": path_to_key,
     }
@@ -696,7 +704,7 @@ def main() -> None:
     OUT_HTML.write_text(out, encoding="utf-8")
     size_mb = OUT_HTML.stat().st_size / (1024 * 1024)
     print(f"Wrote {OUT_HTML} ({size_mb:.2f} MB)")
-    write_book_manifest()
+    write_book_manifest(titles)
     copy_markdown_to_public_md()
 
 

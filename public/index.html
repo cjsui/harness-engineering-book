@@ -83,6 +83,7 @@
       padding: calc(1.25rem + env(safe-area-inset-top, 0px)) 1rem 2rem max(1rem, env(safe-area-inset-left, 0px));
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
+      min-width: 0;
     }
     .brand {
       font-family: var(--font-display);
@@ -134,11 +135,13 @@
       margin: 1.15rem 0 0.45rem;
       font-weight: 600;
     }
-    .nav-list { list-style: none; margin: 0; padding: 0; }
-    .nav-item { margin: 0.15rem 0; }
+    .nav-list { list-style: none; margin: 0; padding: 0; min-width: 0; }
+    .nav-item { margin: 0.15rem 0; min-width: 0; }
     .nav-link {
       display: block;
       width: 100%;
+      max-width: 100%;
+      min-width: 0;
       text-align: left;
       border: none;
       background: transparent;
@@ -149,6 +152,9 @@
       border-radius: 8px;
       cursor: pointer;
       line-height: 1.35;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     .nav-link:hover { background: var(--accent-soft); }
     .nav-link[aria-current="page"] { background: var(--nav-active); font-weight: 600; }
@@ -455,7 +461,10 @@
           btn.type = "button";
           btn.className = "nav-link";
           btn.setAttribute("data-key", k);
-          btn.textContent = manifest.labels[k] || k;
+          var navTitle =
+            (manifest.titles && manifest.titles[k]) || manifest.labels[k] || k;
+          btn.textContent = navTitle;
+          btn.setAttribute("title", navTitle);
           btn.addEventListener("click", function () {
             showDoc(k);
           });
