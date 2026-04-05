@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 import re
+import shutil
 import sys
 from pathlib import Path
 
@@ -22,6 +23,7 @@ BOOK_ROOT = Path(__file__).resolve().parent.parent
 OUT_HTML = BOOK_ROOT / "reader.html"
 PUBLIC_DIR = BOOK_ROOT / "public"
 OUT_MANIFEST = PUBLIC_DIR / "book-manifest.json"
+MD_PUBLIC = PUBLIC_DIR / "md"
 
 # Ordered navigation: (key, nav_label, relative_path_from_BOOK_ROOT)
 NAV: list[tuple[str, str, str]] = [
@@ -643,8 +645,24 @@ def _html_escape(s: str) -> str:
     )
 
 
+def copy_markdown_to_public_md() -> None:
+    """Mirror NAV .md files under public/md/ so Vercel can serve them as static assets."""
+    if MD_PUBLIC.is_dir():
+        shutil.rmtree(MD_PUBLIC)
+    MD_PUBLIC.mkdir(parents=True, exist_ok=True)
+    for _key, _nav, rel in NAV:
+        src = BOOK_ROOT / rel
+        dst = MD_PUBLIC / rel
+        if not src.is_file():
+            print(f"Missing (skip copy): {src}", file=sys.stderr)
+            sys.exit(1)
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dst)
+    print(f"Wrote markdown mirrors under {MD_PUBLIC}")
+
+
 def write_book_manifest() -> None:
-    """Emit JSON for Vercel /api/doc + public/index.html (dynamic Markdown reader)."""
+    """Emit JSON for public/index.html (dynamic Markdown reader) + static /md/*.md paths."""
     path_to_key: dict[str, str] = {rel.replace("\\", "/"): key for key, _nav, rel in NAV}
     keys: dict[str, str] = {key: rel.replace("\\", "/") for key, _nav, rel in NAV}
     labels: dict[str, str] = {key: nav for key, nav, _rel in NAV}
@@ -679,6 +697,7 @@ def main() -> None:
     size_mb = OUT_HTML.stat().st_size / (1024 * 1024)
     print(f"Wrote {OUT_HTML} ({size_mb:.2f} MB)")
     write_book_manifest()
+    copy_markdown_to_public_md()
 
 
 if __name__ == "__main__":

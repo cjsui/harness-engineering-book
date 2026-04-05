@@ -273,7 +273,7 @@
   <div class="app">
     <aside class="sidebar" id="sidebar" aria-label="章節導覽">
       <p class="brand">Harness Engineering</p>
-      <p class="brand-sub">動態讀取專案內 Markdown（Vercel：<code>/api/doc</code>）· 與離線版 <code>reader.html</code> 導覽一致</p>
+      <p class="brand-sub">執行時以 <code>fetch</code> 載入 <code>/md/…</code> 靜態 Markdown（Vercel 即使只部署 <code>public/</code> 也可讀）· 與離線版 <code>reader.html</code> 導覽一致</p>
       <div class="toolbar">
         <button type="button" class="btn" id="themeBtn" aria-label="切換深色與淺色模式">主題</button>
       </div>
@@ -311,6 +311,10 @@
 
     function stripFirstH1(html) {
       return html.replace(/^\s*<h1[^>]*>[\s\S]*?<\/h1>\s*/i, "");
+    }
+
+    function mdPublicUrl(rel) {
+      return "/md/" + rel.split("/").map(encodeURIComponent).join("/");
     }
 
     function rewriteInternalMdLinks(html, pathToKey) {
@@ -399,20 +403,20 @@
       document.getElementById("docMeta").textContent = "";
       document.getElementById("docBody").innerHTML = "<p>載入中…</p>";
 
-      fetch("/api/doc?key=" + encodeURIComponent(key))
+      var relPath = manifest.keys[key];
+      fetch(mdPublicUrl(relPath))
         .then(function (r) {
           if (!r.ok) throw new Error("HTTP " + r.status);
-          return r.json();
+          return r.text();
         })
-        .then(function (data) {
-          var md = data.markdown || "";
+        .then(function (md) {
           var label = (manifest.labels && manifest.labels[key]) || key;
           var title = firstHeadingTitle(md, label);
           var rawHtml = marked.parse(md, { headerIds: true });
           var html = rewriteInternalMdLinks(stripFirstH1(rawHtml), pathToKey);
           document.getElementById("docBody").innerHTML = html;
           document.getElementById("docTitle").textContent = title;
-          document.getElementById("docMeta").textContent = data.path || "";
+          document.getElementById("docMeta").textContent = relPath || "";
           document.querySelectorAll(".nav-link").forEach(function (el) {
             el.setAttribute("aria-current", el.getAttribute("data-key") === key ? "page" : "false");
           });
@@ -430,7 +434,7 @@
           document.getElementById("docTitle").textContent = "載入失敗";
           document.getElementById("docMeta").textContent = String(e && e.message ? e.message : e);
           document.getElementById("docBody").innerHTML =
-            '<p class="load-err">無法載入章節。請確認已部署 <code>/api/doc</code>，且建置已產生 <code>public/book-manifest.json</code>。</p>';
+            '<p class="load-err">無法載入章節。請確認已執行 <code>python3 tools/build_reader.py</code>，且 repo 內含 <code>public/md/</code> 與 <code>public/book-manifest.json</code> 並已部署。</p>';
         });
     }
 
