@@ -37,7 +37,9 @@ mini-harness/
 
 ## 建議的製作流程
 
-### Step 1：先寫 scope contract
+### Step 1：先寫 scope contract ⏱️ 預計 30 分鐘
+
+- [ ] 用一頁文字寫清楚 Included 和 Excluded
 
 先用一頁文字寫清楚：
 
@@ -46,21 +48,52 @@ mini-harness/
 
 沒有這一步，專題很容易變成持續膨脹的功能清單。
 
-### Step 2：先把骨架搭對
+### Step 2：先把骨架搭對 ⏱️ 預計 1-2 小時
+
+- [ ] 建立 `mini_harness/` 目錄與 `__init__.py`
+- [ ] 建立 `runtime.py`、`tools.py`、`permissions.py` 三個檔案
+- [ ] 建立 `tests/` 目錄與三個測試檔案
+- [ ] 在每個檔案中定義核心 class/function 的空殼（interface first）
 
 在 `runtime.py`、`tools.py`、`permissions.py` 中先建立責任邊界，再補功能。不要一開始就把所有邏輯塞進單一檔案。因為這門專題真正要評估的，不只是能不能跑，而是你有沒有保留 harness 的分層思維。
 
-### Step 3：先完成最小 roundtrip
+### Step 3：先完成最小 roundtrip ⏱️ 預計 2-3 小時
+
+- [ ] 實作 `ToolSpec` 和 `ToolRegistry`，至少註冊兩個工具
+- [ ] 實作 `Runtime` 的 message loop，能處理模型回應
+- [ ] 讓模型可以請求工具，runtime 真的執行工具
+- [ ] 確認工具結果能回到下一輪，assistant 能產生完成訊息
+- [ ] 跑一次完整的手動測試，確認主鏈打通
 
 先讓系統做到一件事：模型可以請求工具，runtime 真的執行工具，工具結果能回到下一輪，最後 assistant 能產生完成訊息。只要這條主鏈沒有打通，其他周邊能力都不應該先做。
 
-### Step 4：再補 permission denial
+### Step 4：再補 permission denial ⏱️ 預計 1-2 小時
+
+- [ ] 實作 `PermissionMode`（至少 read-only 和 workspace-write）
+- [ ] 實作 `PermissionPolicy` 和 `authorize()` 函式
+- [ ] 在 runtime 的工具執行前加入 permission 檢查
+- [ ] 手動測試：用 read-only 模式嘗試需要 write 權限的工具，確認被拒絕
 
 加入一個至少會被拒絕的工具情境。這一步非常關鍵，因為它能證明你的系統不是把工具直接裸露給模型，而是真的有治理層。
 
-### Step 5：最後補 session persistence 與 tests
+### Step 5：最後補 session persistence 與 tests ⏱️ 預計 2-3 小時
+
+- [ ] 實作 session 的 JSONL 寫入（每次新增訊息自動 append）
+- [ ] 實作 session 的讀取與 replay（啟動時重建 in-memory session）
+- [ ] 撰寫 `test_runtime.py`：至少一個 runtime turn roundtrip 測試
+- [ ] 撰寫 `test_permissions.py`：至少一個 permission denial 測試
+- [ ] 撰寫 `test_tools.py`（或整合進其他測試）：至少一個 session roundtrip 測試
+- [ ] 用 `pytest` 跑過全部測試，確認都通過
 
 把 message history 寫進 `jsonl` 或其他簡單格式，確保 session 能重新載入。然後補三類基本測試。這時候你的專題才真正從 demo 變成一個最小但完整的 harness。
+
+### Step 6：撰寫 README 與設計說明 ⏱️ 預計 1 小時
+
+- [ ] 撰寫 README.md（見下方建議結構）
+- [ ] 撰寫簡短設計說明，解釋和 `claw-code` 的對照關係
+- [ ] 最後檢查：所有測試通過、README 能指引他人使用
+
+> **⏱️ 總預計時間：7-12 小時**（視 Python 經驗而定，分 2-3 天完成是合理的節奏）
 
 ## 最低完成標準
 

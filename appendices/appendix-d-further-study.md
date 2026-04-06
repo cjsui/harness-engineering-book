@@ -8,6 +8,9 @@
 
 ## 方向 1：`MCP` 與能力擴充介面
 
+**難度等級**：★★★☆☆
+**建議順序**：第 3 順位（先完成 local reliability 和 evaluation 後再做）
+
 如果你想讓 harness 能接更多外部能力來源，而不是只靠內建工具，下一步很自然會走到 `MCP`。這條路線的核心問題包括：
 
 - 工具 schema 如何跨邊界對齊？
@@ -18,6 +21,9 @@
 這個方向適合想研究 extension architecture、tool bridge 與能力治理的人。
 
 ## 方向 2：Multi-Agent Orchestration
+
+**難度等級**：★★★★☆
+**建議順序**：第 5 順位（最後再做，需要前面所有基礎都穩固）
 
 當一個 agent 不夠用，或者你想把任務拆成 planner、executor、reviewer 等多角色時，就會進入 multi-agent orchestration。這條路線最重要的不是讓 agent 數量變多，而是處理：
 
@@ -30,6 +36,9 @@
 
 ## 方向 3：UI 與 Human Oversight
 
+**難度等級**：★★☆☆☆
+**建議順序**：第 4 順位（在 evaluation 之後、multi-agent 之前）
+
 本書主要用 CLI 與教材式視角理解 harness，但真實系統常常還需要更好的操作介面。你可以研究：
 
 - approval flow 如何在 UI 中被清楚呈現
@@ -40,6 +49,9 @@
 這個方向特別適合想把 harness 變成真正可被一般使用者操作的產品介面的人。
 
 ## 方向 4：Deployment 與運維
+
+**難度等級**：★★★★★
+**建議順序**：第 6 順位（最進階，需要所有前置能力都到位）
 
 當 harness 從個人專案變成團隊工具，deployment 問題就會浮現。這不只是把程式放到雲端而已，而是要考慮：
 
@@ -53,6 +65,9 @@
 
 ## 方向 5：Evaluation、Telemetry 與 Cost Awareness
 
+**難度等級**：★★☆☆☆
+**建議順序**：第 2 順位（緊接在 local reliability 之後）
+
 只要系統開始長期使用，`evaluation` 就不再是可有可無的補充件。你會需要思考：
 
 - 什麼叫做一輪任務成功？
@@ -63,6 +78,9 @@
 如果沒有 evaluation 與 telemetry，系統就算看起來能跑，也很難知道它是不是在悄悄變差。
 
 ## 方向 6：Security、Sandbox 與 Policy Engineering
+
+**難度等級**：★★★☆☆
+**建議順序**：第 3 順位（和 MCP 同階段，可平行進行）
 
 當 agent 擁有更多手腳，安全邊界就會成為真正的設計核心。後續可深入的問題包括：
 
@@ -77,10 +95,14 @@
 
 如果你不確定從哪裡開始，以下是一條很穩健的順序：
 
-1. 先補 local reliability：CLI、config、prompt assembly、更多 tests
-2. 再補 evaluation / telemetry，建立可觀測性
-3. 接著才處理 `MCP` 或其他 extension boundary
-4. 最後再考慮 remote、deployment、multi-agent orchestration
+| 順序 | 方向 | 難度 | 重點 |
+|---|---|---|---|
+| 1️⃣ | Local Reliability（CLI、config、prompt assembly、更多 tests） | ★★☆☆☆ | 把系統做穩、做好用 |
+| 2️⃣ | Evaluation / Telemetry（方向 5） | ★★☆☆☆ | 建立可觀測性，知道系統好不好 |
+| 3️⃣ | MCP / Security（方向 1 + 6） | ★★★☆☆ | 擴充能力邊界，同時管好安全 |
+| 4️⃣ | UI / Human Oversight（方向 3） | ★★☆☆☆ | 讓一般使用者也能操作 |
+| 5️⃣ | Multi-Agent（方向 2） | ★★★★☆ | 多角色協作與任務切分 |
+| 6️⃣ | Deployment / 運維（方向 4） | ★★★★★ | 從個人工具走向團隊服務 |
 
 這個順序的好處是：你會先把系統做得穩、看得清，再去碰會大量放大複雜度的議題。
 

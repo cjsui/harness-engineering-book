@@ -8,10 +8,30 @@
 
 這一章會先定義 project skeleton，再逐一解釋每個檔案對應 Part II 的哪個概念。最後，我們會把這份骨架收斂成一組可操作的 build 任務，讓下一章能順勢接上 session persistence 與測試。
 
+> **📋 本章速覽**
+>
+> 讀完本章，你將會：
+> - 建立一個最小但結構正確的 Python 專案骨架（`mini-harness/`）
+> - 理解 `runtime.py`、`tools.py`、`permissions.py` 各自負責什麼
+> - 知道為什麼「先把結構對，再補功能」比一開始就寫萬能大檔案更好
+> - 學會用 `claw-code` 的真實檔案對照你的教學版模組
+> - 建立「測試從第一天就是系統一部分」的工程習慣
+
 ## 學習目標
 - 能建立一個保留 harness 本質的 Python 專案骨架
 - 能說明 `runtime.py`、`tools.py`、`permissions.py` 各自對應 Part II 的哪個系統責任
 - 能在縮小版實作中維持清楚的能力邊界，而不把所有邏輯混成單一腳本
+
+> **🔍 先備知識檢查**
+>
+> 開始本章之前，請確認你已經：
+> - [ ] 讀過第 6 章，理解 runtime loop 的基本概念（模型回應 → 工具呼叫 → 結果回寫）
+> - [ ] 讀過第 7 章，知道 `ToolSpec`、registry、dispatch 是什麼意思
+> - [ ] 讀過第 8 章，明白 permission policy 為什麼不能只是裝飾
+> - [ ] 對 Python 的 package 結構有基本認識（`__init__.py` 的作用）
+> - [ ] 知道什麼是 JSON schema（至少看過一個例子）
+>
+> 如果以上有不確定的，建議先回去複習對應章節再來。
 
 ## 核心概念講解
 
@@ -31,9 +51,21 @@ mini-harness/
 
 這個骨架之所以好，不是因為它最短，而是因為它剛好把三條最核心的責任線拉開。
 
+> 💡 **生活化比喻**：把整個 `mini-harness` 想像成一家餐廳。`runtime.py` 是**外場經理**，負責控制點餐到上菜的整個流程；`tools.py` 是**廚房**，裡面有各種菜單與料理設備；`permissions.py` 是**食品安全稽查員**，確保每道菜上桌前都符合衛生標準。三者各司其職，才能讓整家餐廳順利運作。
+
+### `__init__.py`：Package 入口
+
 `mini_harness/__init__.py` 的角色很簡單，但仍然重要。它不需要承擔業務邏輯，而是作為 package 的明確出口，整理最值得對外暴露的型別與主物件。對教學來說，這可以幫學生建立一個清楚印象：系統不是靠檔案偶然拼在一起，而是一個有正式入口的 package。
 
+### `runtime.py`：流程控制核心
+
 `runtime.py` 對應的就是我們在第 6 章讀過的 `ConversationRuntime` 核心精神。當然，Python 版不需要一開始就複製 hooks、prompt cache、session tracer 與 auto compaction，但至少要有幾個本質成分：一個 `Runtime` 類別或主函式、可注入的 model client 邊界、message loop、最大迭代數、以及遇到 tool use 時會呼叫 tool dispatcher 並把結果送回下一輪。這個檔案的任務是控制流程，不是宣告工具細節，也不是決定權限規則。
+
+> 💡 **生活化比喻**：`runtime.py` 就像一位**交響樂指揮**。指揮不會自己演奏樂器（那是工具的事），也不會決定哪首曲子能不能演（那是權限的事），但整個演出從開始到結束的節奏、順序、什麼時候該誰上場，全都由指揮控制。
+
+> ⚠️ **初學者常見誤區**：很多人在寫 `runtime.py` 時，會不小心把工具的具體實作邏輯直接寫進去（例如直接在 runtime 裡面寫讀檔案、執行 shell 指令的程式碼）。請記住：**runtime 只負責「指揮」，不負責「演奏」**。如果你發現自己在 `runtime.py` 裡寫了具體的工具操作程式碼，那就是警訊。
+
+### `tools.py`：能力宣告與 Dispatch
 
 `tools.py` 對應的則是第 7 章的 tool system。這裡最值得保留的不是龐大的工具數量，而是 `ToolSpec` + registry + dispatch 這條骨架。也就是說，Python 版應該至少有：
 
@@ -43,6 +75,10 @@ mini-harness/
 
 這讓你在教學版裡仍然保留「能力宣告」與「能力執行」的分工，而不是把工具當成幾個裸露函式硬塞給 runtime。
 
+> 💡 **生活化比喻**：`tools.py` 就像一本**工具型錄**加上**工具倉庫**。型錄（`ToolSpec`）告訴你有什麼工具、每個工具怎麼用、需要什麼等級的授權才能使用。倉庫管理員（`ToolRegistry`）負責查找和取出工具。而 `dispatch()` 就是真正拿起工具開始用的那個動作。
+
+### `permissions.py`：治理邊界
+
 `permissions.py` 對應第 8 章的 permission / guardrail layer。教學版不必完整重做 `PermissionEnforcer` 的所有 heuristics，但至少應該有：
 
 - `PermissionMode`
@@ -50,6 +86,12 @@ mini-harness/
 - 一個 `authorize(tool_name, input)` 的最小授權流程
 
 重點是讓 runtime 在每次工具執行前，真的會問 permission layer，而不是只在文字上說「理論上會檢查」。這個邏輯只要被拆到獨立檔案，學生就比較能真正理解「能力」與「治理」是兩個不同責任。
+
+> 💡 **生活化比喻**：`permissions.py` 就像大樓的**門禁系統**。不管你手上有多少把鑰匙（工具），每次你要進某個房間之前，門禁系統都會先刷卡檢查你有沒有權限。如果你的卡片等級不夠（比如只有 `read-only` 權限），即使你知道門在哪裡，門禁也不會讓你進去。
+
+> ⚠️ **初學者常見誤區**：有些人覺得「反正我的教學版只有兩三個工具，permissions 直接寫在 runtime 裡就好了」。這種想法非常危險！因為一旦權限邏輯散落在 runtime 各處，你很快就會分不清楚「什麼被允許、什麼被拒絕」。把 permissions 獨立出來，不是為了看起來比較厲害，而是為了**在系統成長時不失控**。
+
+### `tests/`：從第一天就預期被驗證
 
 最後是 `tests/`。很多人會覺得測試應該留到下一章再談，但在 project skeleton 階段先把 `test_runtime.py`、`test_tools.py`、`test_permissions.py` 放進樹裡，本身就有教學意義。它等於先宣告：這個專案一開始就預期自己會被驗證，而不是等功能都寫完才想到要補測。這種先把 testing 當正式模組的習慣，本身就是 harness thinking 的一部分。
 
@@ -104,6 +146,30 @@ mini-harness/
 
 第 17 章把 `mini harness` 的概念範圍轉成具體 Python 專案骨架。`runtime.py` 對應流程控制，`tools.py` 對應能力宣告與 dispatch，`permissions.py` 對應治理邊界，`tests/` 則預告這是一個從一開始就要被驗證的系統。這個骨架的價值，不在於它已經完整，而在於它已經把最重要的系統責任放在對的位置上。
 
+> **✅ 學習自我檢核**
+>
+> 讀完本章後，請確認你能做到以下每一項：
+> - [ ] 我能畫出 `mini-harness/` 的檔案樹，並說出每個檔案的職責
+> - [ ] 我能解釋為什麼 runtime、tools、permissions 不該合併成一個檔案
+> - [ ] 我能說出 `ToolSpec` 至少包含哪四個欄位
+> - [ ] 我知道 `permissions.py` 的 `authorize()` 函式會在什麼時候被呼叫
+> - [ ] 我理解 `tests/` 為什麼要在第一天就放進專案骨架
+> - [ ] 我能把教學版的每個檔案對應到 `claw-code` 的真實檔案
+
+## 關鍵概念速查表
+
+| 術語 | 說明 | 對應檔案 |
+|---|---|---|
+| Runtime Loop | 控制「接收輸入 → 呼叫模型 → 處理工具 → 回傳結果」的主迴圈 | `runtime.py` |
+| Tool Dispatch | 根據工具名稱找到對應實作並執行 | `tools.py` |
+| ToolSpec | 工具的正式宣告，包含名稱、描述、schema、所需權限 | `tools.py` |
+| ToolRegistry | 集中管理所有工具宣告的註冊中心 | `tools.py` |
+| PermissionMode | 目前系統允許的權限等級（如 read-only、workspace-write） | `permissions.py` |
+| PermissionPolicy | 定義哪些權限等級可以做哪些事的規則集 | `permissions.py` |
+| authorize() | 在工具執行前檢查權限是否足夠的函式 | `permissions.py` |
+| Architectural Parity | 保留架構精神而非完整功能的設計策略 | 全專案 |
+| Project Skeleton | 專案的初始檔案結構，定義責任邊界 | `mini-harness/` 整體 |
+
 ## 章末練習
 1. 說明為什麼 `runtime.py`、`tools.py`、`permissions.py` 不應被合併成單一檔案。
 2. 為 `mini harness` 設計兩個最小工具，並替它們各自指定 `required_permission`。
@@ -114,6 +180,10 @@ mini-harness/
 - 你傾向於一開始就做較多模組拆分，還是先做一個大檔案再重構？對教學版來說，哪一種風險比較高？
 - 如果一個學生把 `permissions.py` 視為可有可無的附加檔案，這透露了他在哪個概念上還沒真正理解？
 - 你覺得 `tests/` 先出現在骨架裡，會改變學生對整個專案的心智模型嗎？怎麼改變？
+
+> **📝 本章一句話總結**
+>
+> 好的 harness 骨架不在於功能多寡，而在於從第一天就把「流程控制」、「能力宣告」和「權限治理」放在各自該待的位置。
 
 ## 延伸閱讀 / 下一章預告
 

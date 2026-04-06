@@ -8,10 +8,28 @@
 
 本章要處理四個核心問題：什麼是 `session persistence`、什麼是 `transcript`、`resume` 為什麼能成立、以及長對話時為什麼需要 `compaction`。理解這四者後，你會更清楚 agent 的「記憶」其實不是單一 feature，而是狀態保存、重播、摘要與使用成本管理一起構成的系統能力。
 
+> **📋 本章速覽**
+>
+> 讀完本章後，你將能夠：
+> - 理解 `session` 為什麼不只是聊天記錄，而是一個可持久化的狀態容器
+> - 分辨 `transcript` 與普通對話紀錄的結構差異
+> - 說明 `resume`（恢復對話）為什麼能成立，以及背後依賴什麼機制
+> - 理解 `compaction`（壓縮）如何讓長對話在可控成本下繼續運作
+> - 判斷哪些 session 能力對初學者的 mini harness 最重要
+
 ## 學習目標
 - 能解釋 `session`、`transcript`、`resume`、`compaction` 在 `claw-code` 中的角色
 - 能說明結構化 session 為什麼比單純聊天記錄更適合 agent harness
 - 能判斷 `mini harness` 應保留哪些 session 能力，哪些可暫時簡化
+
+### 先備知識檢查
+
+開始本章前，請確認你已經了解以下內容：
+
+- [ ] 知道什麼是 JSON 格式（本章的 session 會以 JSON 保存）
+- [ ] 理解「持久化」（persistence）的基本概念：把記憶體中的資料存到檔案裡
+- [ ] 讀過前幾章，對 agent 的 runtime loop、tool use 流程有基本認識
+- [ ] 知道什麼是 token（語言模型計費的基本單位）
 
 ## 核心概念講解
 ### session persistence
@@ -20,11 +38,15 @@
 
 更重要的是，它真的會寫到檔案。`save_to_path()` 會把當前 session snapshot 寫出，`with_persistence_path()` 與 `append_persisted_message()` 則讓新訊息能被追加到持久化檔案中。也就是說，session 不是靠「程式還活著」才存在，而是被設計成可中斷、可恢復、可重播的狀態容器。這正是 `session persistence` 的意義。
 
+> 💡 **生活化比喻**：想像你在做一道複雜的料理。如果你每次離開廚房再回來，都忘了前面做到哪一步、用了哪些食材、鍋裡煮了什麼——那你根本無法完成這道菜。Session persistence 就像把你的「料理進度」拍照存下來：用了哪些食材、每個鍋的狀態、調味的順序，全部記在紙上。這樣即使你離開廚房（程式關閉），回來時打開紙條（讀取檔案）就能從上次停下的地方繼續。
+
 ### transcript
 
 很多人會把 transcript 理解成「聊天紀錄」，但在 agent harness 裡，transcript 更像「行為紀錄與狀態日誌」。`ConversationMessage` 不是只有 user 與 assistant 文本，它還可以包含 `ContentBlock::ToolUse` 與 `ContentBlock::ToolResult`。這表示 transcript 會記住模型曾要求什麼工具、工具回了什麼結果、那個結果是否是 error。
 
 這個差異很重要。若 transcript 只保存最後的人類可讀文字，很多 agent 行為就無法被重建。runtime 不知道上一輪執行過什麼工具，testing 也難以還原 bug。正因為 transcript 是結構化的，所以它同時服務於使用者理解、runtime resume、以及後續 debugging。
+
+> 💡 **生活化比喻**：普通的聊天紀錄就像只記「今天做了紅燒肉」的日記。但 transcript 更像一本詳細的實驗筆記：不只記結果，還記你量了多少克肉、用了什麼鍋、火開多大、中間有沒有燒焦過。有了這種詳細紀錄，別人（或未來的你）才能完全還原當時的操作過程。
 
 ### resume
 
@@ -32,11 +54,20 @@
 
 `Session::load_from_path()` 更進一步展現了這點：它可以從 JSON object 或 JSONL 內容載入 session，再配上 persistence path。這意味著 resume flow 本質上是「讀取並重建狀態」，而不是「重新開始並希望模型自己記得」。從 harness engineering 的角度看，這正是狀態管理與單純聊天 UI 的分界之一。
 
+> 💡 **生活化比喻**：假設你在玩一款角色扮演遊戲。如果遊戲沒有存檔功能，每次打開都要從頭開始——這就像沒有 resume 的 agent。但有了存檔（session persistence），你可以「讀取進度」回到上次的狀態：角色等級、背包裡的道具、地圖上的位置全都完好如初。Resume 就是這個「讀檔」的動作。
+
+> ⚠️ **初學者常見誤區**
+>
+> - **誤區一**：以為 resume 是靠模型的「記憶力」——其實模型每次都是全新的，它能「記得」上次的事，完全是因為 harness 把完整 session 重新餵給它。
+> - **誤區二**：以為只要存文字就夠了——如果只存人話和 AI 回覆，卻沒存 tool use 紀錄，resume 後模型就不知道上次執行了哪些操作，可能會重複做同樣的事。
+
 ### compaction
 
 只保存狀態還不夠，因為長對話會讓上下文不斷膨脹。這時候 `compaction` 就變得重要。`SessionCompaction` 與 runtime 中的 auto-compaction 機制說明，`claw-code` 並沒有假裝上下文可以無限累積，而是承認 session 需要被摘要與瘦身。這讓系統能在維持工作記憶的同時，控制 token 成本與 prompt 長度。
 
 這裡 `usage.rs` 也扮演關鍵角色。`UsageTracker::from_session()` 會從現有 session 重建累積 usage，表示 usage 並不是和 session 分離的後置報表，而是 session management 的一部分。因為只有知道累積 token 與成本，runtime 才能更合理地決定何時需要 compaction。這也是為什麼本章同時讀 `session.rs` 與 `usage.rs` 特別有意義。
+
+> 💡 **生活化比喻**：想像你的筆記本只有 100 頁。每次對話都在寫新筆記，寫到快滿時怎麼辦？你不能直接丟掉整本筆記本（那會失去所有記憶），但你可以把前面 80 頁的內容「濃縮摘要」成 5 頁精華，騰出空間繼續寫。Compaction 就是這個「濃縮摘要」的過程——保留重點，釋放空間，讓對話可以繼續下去。
 
 ## `claw-code` 對照閱讀
 ### 建議閱讀檔案
@@ -69,6 +100,29 @@ session 系統的最大取捨，是「保存越完整」與「維護越複雜」
 
 在 `claw-code` 裡，`session` 不只是保存聊天內容，而是承載 `transcript`、tool results、usage、resume、compaction 等能力的核心狀態容器。它讓 agent work 可以跨回合延續，也讓 runtime 與測試能基於結構化紀錄重建先前行為。理解這一層，才能真正明白為什麼多輪 agent 系統不能只靠「模型記得剛剛在說什麼」。
 
+### 學習自我檢核
+
+讀完本章後，請確認以下每一項你都能做到：
+
+- [ ] 我能解釋 `session` 和普通「聊天記錄」的差別
+- [ ] 我知道 `transcript` 為什麼需要包含 tool use 和 tool result，而不只是文字
+- [ ] 我能說明 `resume` 背後的機制是「狀態重建」，而不是「模型自己記得」
+- [ ] 我理解 `compaction` 的必要性：長對話需要壓縮才能控制成本
+- [ ] 我能判斷在 mini harness 中，哪些 session 功能該先做、哪些可以晚做
+- [ ] 我知道 `usage tracking` 和 `compaction` 之間的關聯
+
+### 關鍵概念速查表
+
+| 術語 | 英文 | 簡要說明 |
+|------|------|----------|
+| Session | Session | Agent 的完整工作狀態容器，包含訊息、工具結果、使用量等 |
+| Transcript | Transcript | 結構化的行為紀錄，不只有文字，還包含 tool use / tool result |
+| 持久化 | Persistence | 把記憶體中的狀態寫到檔案，讓程式關閉後還能恢復 |
+| 恢復 | Resume | 從檔案讀取先前的 session 狀態，繼續上次的工作 |
+| 壓縮 | Compaction | 把過長的對話摘要濃縮，騰出上下文空間並控制成本 |
+| 使用量追蹤 | Usage Tracking | 記錄累積的 token 數與花費，用於決定何時需要 compaction |
+| Fork | Fork | 從某個 session 分支出新的工作路線 |
+
 ## 章末練習
 1. 解釋為什麼 agent transcript 需要保存 tool use 與 tool result，而不只是最終回答。
 2. 說明 `resume` 為什麼依賴 session persistence，而不是只依賴 prompt wording。
@@ -79,6 +133,10 @@ session 系統的最大取捨，是「保存越完整」與「維護越複雜」
 - 你覺得很多人為什麼會把 session 問題低估成「只是聊天記錄」？
 - 若一個系統只有 resume、沒有 compaction，長期最可能出現什麼問題？
 - 如果 transcript 足夠完整，你認為它除了 resume 之外，還能支援哪些工程工作？
+
+> **📝 本章一句話總結**
+>
+> Agent 的「記憶」不是模型自己記得，而是 harness 透過結構化的 session persistence、transcript、resume 與 compaction 共同建構出來的系統能力。
 
 ## 延伸閱讀 / 下一章預告
 
